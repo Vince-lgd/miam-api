@@ -5,6 +5,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import fr.vince.miam.api.exception.ArticleIntrouvableException;
 import fr.vince.miam.api.model.Article;
+import fr.vince.miam.api.model.Categorie;
 import fr.vince.miam.api.repository.ArticleRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,5 +53,41 @@ class ArticleServiceTest {
                 .isInstanceOf(ArticleIntrouvableException.class);
 
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void modifier_recopieLesNouvellesValeursEtEnregistre() {
+        // Arrange : un article existe déjà en base
+        UUID id = UUID.randomUUID();
+        Article existant = new Article();
+        existant.setNom("Lait");
+        when(repository.findById(id)).thenReturn(Optional.of(existant));
+        when(repository.save(any(Article.class))).thenAnswer(appel -> appel.getArgument(0));
+
+        Article modifications = new Article();
+        modifications.setNom("Lait d'avoine");
+        modifications.setQuantite(2);
+        modifications.setAchete(true);
+        modifications.setCategorie(Categorie.ALIMENTATION);
+
+        // Act
+        Article resultat = service.modifier(id, modifications);
+
+        // Assert
+        assertThat(resultat.getNom()).isEqualTo("Lait d'avoine");
+        assertThat(resultat.getQuantite()).isEqualTo(2);
+        assertThat(resultat.isAchete()).isTrue();
+        assertThat(resultat.getCategorie()).isEqualTo(Categorie.ALIMENTATION);
+        verify(repository).save(existant);
+    }
+
+    @Test
+    void supprimer_supprimeLArticleSIlExiste() {
+        UUID id = UUID.randomUUID();
+        when(repository.existsById(id)).thenReturn(true);
+
+        service.supprimer(id);
+
+        verify(repository).deleteById(id);
     }
 }
