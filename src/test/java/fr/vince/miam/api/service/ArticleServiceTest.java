@@ -20,6 +20,8 @@ import fr.vince.miam.api.exception.ArticleIntrouvableException;
 import fr.vince.miam.api.model.Article;
 import fr.vince.miam.api.model.Categorie;
 import fr.vince.miam.api.repository.ArticleRepository;
+import fr.vince.miam.api.dto.ArticleRequest;
+import fr.vince.miam.api.dto.ArticleResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ArticleServiceTest {
@@ -49,7 +51,7 @@ class ArticleServiceTest {
         UUID id = UUID.randomUUID();
         when(repository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.modifier(id, new Article()))
+        assertThatThrownBy(() -> service.modifier(id, new ArticleRequest("Lait", 1, false, Categorie.ALIMENTATION)))
                 .isInstanceOf(ArticleIntrouvableException.class);
 
         verify(repository, never()).save(any());
@@ -64,20 +66,16 @@ class ArticleServiceTest {
         when(repository.findById(id)).thenReturn(Optional.of(existant));
         when(repository.save(any(Article.class))).thenAnswer(appel -> appel.getArgument(0));
 
-        Article modifications = new Article();
-        modifications.setNom("Lait d'avoine");
-        modifications.setQuantite(2);
-        modifications.setAchete(true);
-        modifications.setCategorie(Categorie.ALIMENTATION);
+        ArticleRequest demande = new ArticleRequest("Lait d'avoine", 2, true, Categorie.ALIMENTATION);
 
         // Act
-        Article resultat = service.modifier(id, modifications);
+        ArticleResponse resultat = service.modifier(id, demande);
 
         // Assert
-        assertThat(resultat.getNom()).isEqualTo("Lait d'avoine");
-        assertThat(resultat.getQuantite()).isEqualTo(2);
-        assertThat(resultat.isAchete()).isTrue();
-        assertThat(resultat.getCategorie()).isEqualTo(Categorie.ALIMENTATION);
+        assertThat(resultat.nom()).isEqualTo("Lait d'avoine");
+        assertThat(resultat.quantite()).isEqualTo(2);
+        assertThat(resultat.achete()).isTrue();
+        assertThat(resultat.categorie()).isEqualTo(Categorie.ALIMENTATION);
         verify(repository).save(existant);
     }
 

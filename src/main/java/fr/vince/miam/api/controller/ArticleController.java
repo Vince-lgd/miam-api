@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.vince.miam.api.model.Article;
+import fr.vince.miam.api.dto.ArticleRequest;
+import fr.vince.miam.api.dto.ArticleResponse;
 import fr.vince.miam.api.service.ArticleService;
 import jakarta.validation.Valid;
 
@@ -29,18 +30,18 @@ public class ArticleController {
     }
 
     @GetMapping
-    public List<Article> lister() {
+    public List<ArticleResponse> lister() {
         return service.lister();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Article ajouter(@Valid @RequestBody Article article) {
-        return service.ajouter(article);
+    public ArticleResponse ajouter(@Valid @RequestBody ArticleRequest demande) {
+        return service.ajouter(demande);
     }
 
     @PutMapping("/{id}")
-    public Article modifier(@PathVariable UUID id, @Valid @RequestBody Article modifications) {
+    public ArticleResponse modifier(@PathVariable UUID id, @Valid @RequestBody ArticleRequest modifications) {
         return service.modifier(id, modifications);
     }
 

@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import fr.vince.miam.api.dto.ArticleRequest;
+import fr.vince.miam.api.dto.ArticleResponse;
 import fr.vince.miam.api.exception.ArticleIntrouvableException;
 import fr.vince.miam.api.model.Article;
 import fr.vince.miam.api.repository.ArticleRepository;
@@ -18,24 +20,23 @@ public class ArticleService {
         this.repository = repository;
     }
 
-    public List<Article> lister() {
-        return repository.findAll();
+    public List<ArticleResponse> lister() {
+        return repository.findAll().stream()
+                .map(ArticleResponse::depuis)
+                .toList();
     }
 
-    public Article ajouter(Article article) {
-        return repository.save(article);
+    public ArticleResponse ajouter(ArticleRequest demande) {
+        Article article = new Article();
+        appliquer(demande, article);
+        return ArticleResponse.depuis(repository.save(article));
     }
 
-    public Article modifier(UUID id, Article modifications) {
+    public ArticleResponse modifier(UUID id, ArticleRequest demande) {
         Article article = repository.findById(id)
                 .orElseThrow(() -> new ArticleIntrouvableException(id));
-
-        article.setNom(modifications.getNom());
-        article.setQuantite(modifications.getQuantite());
-        article.setAchete(modifications.isAchete());
-        article.setCategorie(modifications.getCategorie());
-
-        return repository.save(article);
+        appliquer(demande, article);
+        return ArticleResponse.depuis(repository.save(article));
     }
 
     public void supprimer(UUID id) {
@@ -43,5 +44,12 @@ public class ArticleService {
             throw new ArticleIntrouvableException(id);
         }
         repository.deleteById(id);
+    }
+
+    private void appliquer(ArticleRequest demande, Article article) {
+        article.setNom(demande.nom().trim());
+        article.setQuantite(demande.quantite());
+        article.setAchete(demande.achete());
+        article.setCategorie(demande.categorie());
     }
 }
