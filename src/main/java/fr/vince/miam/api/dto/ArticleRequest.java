@@ -5,17 +5,20 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
 public record ArticleRequest(
-        @NotBlank String nom,
-        @Min(1) Integer quantite,
+        @NotBlank(message = "Le nom de l'article est obligatoire") String nom,
+        @Min(value = 1, message = "La quantité doit être d'au moins 1") Integer quantite,
         Boolean achete,
         Categorie categorie) {
 
     public ArticleRequest {
-        if (quantite == null)
+        if (quantite == null) {
             quantite = 1;
-        if (achete == null)
+        }
+        if (achete == null) {
             achete = false;
-        if (categorie == null)
+        }
+        if (categorie == null) {
             categorie = Categorie.AUTRE;
+        }
     }
 }
