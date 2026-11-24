@@ -1,10 +1,15 @@
 package fr.vince.miam.api.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import fr.vince.miam.api.service.ArticleService;
-
-import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-
-import java.util.UUID;
-
 import fr.vince.miam.api.exception.ArticleIntrouvableException;
+import fr.vince.miam.api.service.ArticleService;
 
 @WebMvcTest(ArticleController.class)
 class ArticleControllerTest {
@@ -38,7 +37,9 @@ class ArticleControllerTest {
                 .content("""
                         {"nom": "   "}
                         """))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Données invalides"))
+                .andExpect(jsonPath("$.erreurs.nom").value("Le nom de l'article est obligatoire"));
 
         verify(service, never()).ajouter(any());
     }
@@ -49,6 +50,7 @@ class ArticleControllerTest {
         doThrow(new ArticleIntrouvableException(id)).when(service).supprimer(id);
 
         mockMvc.perform(delete("/articles/" + id))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Article introuvable"));
     }
 }
