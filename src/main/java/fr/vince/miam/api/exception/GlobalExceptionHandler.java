@@ -33,4 +33,11 @@ public class GlobalExceptionHandler {
         probleme.setProperty("erreurs", erreurs);
         return probleme;
     }
+
+    @ExceptionHandler(EmailDejaUtiliseException.class)
+    public ProblemDetail emailDejaUtilise(EmailDejaUtiliseException e) {
+        ProblemDetail probleme = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+        probleme.setTitle("E-mail déjà utilisé");
+        return probleme;
+    }
 }
