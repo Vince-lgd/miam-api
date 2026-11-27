@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: miam
+      POSTGRES_USER: miam
+      POSTGRES_PASSWORD: miam
+    ports:
+      - "5433:5432"
+    volumes:
+      - miam-data:/var/lib/postgresql/data
+
+volumes:
+  miam-data:
