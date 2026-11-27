@@ -5,9 +5,12 @@ import java.util.UUID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -30,6 +33,10 @@ public class Article {
     @NotNull
     @Enumerated(EnumType.STRING)
     private Categorie categorie = Categorie.AUTRE;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "foyer_id")
+    private Foyer foyer;
 
     public UUID getId() {
         return id;
@@ -65,5 +72,13 @@ public class Article {
 
     public void setCategorie(Categorie categorie) {
         this.categorie = categorie;
+    }
+
+    public Foyer getFoyer() {
+        return foyer;
+    }
+
+    public void setFoyer(Foyer foyer) {
+        this.foyer = foyer;
     }
 }
